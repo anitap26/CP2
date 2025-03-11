@@ -1,0 +1,36 @@
+---
+- name: Instalar y configurar servidor web Nginx en Podman
+  hosts: webserver
+  become: true
+  tasks:
+    - name: Instalar paquetes necesarios
+      apt:
+        name: 
+          - podman
+          - firewalld
+        state: present
+        update_cache: yes
+
+    - name: Habilitar y arrancar firewalld
+      systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Permitir tráfico HTTP en firewalld
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+
+    - name: Recargar firewalld
+      command: firewall-cmd --reload
+
+    - name: Ejecutar contenedor Nginx en Podman
+      containers.podman.podman_container:
+        name: nginx-server
+        image: docker.io/library/nginx
+        state: started
+        recreate: yes
+        ports:
+          - "80:80"
