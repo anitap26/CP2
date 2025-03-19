@@ -1,0 +1,51 @@
+- name: Automatizar subida de imágenes WordPress y MariaDB a ACR desde Podman
+  hosts: webserver
+  become: true
+  collections:
+    - containers.podman
+    - community.general
+  vars_files:
+    - secrets.yml
+  vars:
+    acr_registry: cp2acrckd0cf.azurecr.io
+    wordpress_image: docker.io/library/wordpress:latest
+    mariadb_image: docker.io/library/mariadb:11.0.2
+
+  tasks:
+    - name: Autenticarse en ACR desde Podman
+      podman_login:
+        registry: "{{ acr_registry }}"
+        username: "{{ acr_username }}"
+        password: "{{ acr_password }}"
+
+    - name: Pull de imagen WordPress desde Docker Hub
+      podman_image:
+        name: "{{ wordpress_image }}"
+        pull: true
+
+    - name: Etiquetar imagen WordPress para ACR
+      containers.podman.podman_tag:
+        image: "{{ wordpress_image }}"
+        target_names:
+          - "{{ acr_registry }}/wordpress:latest"
+
+    - name: Subir imagen WordPress al ACR
+      podman_image:
+        name: "{{ acr_registry }}/wordpress:latest"
+        push: true
+
+    - name: Pull de imagen MariaDB desde Docker Hub
+      podman_image:
+        name: "{{ mariadb_image }}"
+        pull: true
+
+    - name: Etiquetar imagen MariaDB para ACR
+      containers.podman.podman_tag:
+        image: "{{ mariadb_image }}"
+        target_names:
+          - "{{ acr_registry }}/mariadb:11.0.2"
+
+    - name: Subir imagen MariaDB al ACR
+      podman_image:
+        name: "{{ acr_registry }}/mariadb:11.0.2"
+        push: true

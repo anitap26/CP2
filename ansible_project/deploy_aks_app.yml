@@ -1,63 +1,15 @@
----
-- name: Desplegar aplicación en AKS con almacenamiento persistente
-  hosts: kubernetes
+- name: Desplegar WordPress y MariaDB en AKS usando imágenes del ACR
+  hosts: localhost
+  connection: local
+  collections:
+    - kubernetes.core
   tasks:
-    - name: Crear un archivo de configuración para la aplicación
-      copy:
-        dest: "/tmp/app_deployment.yml"
-        content: |
-          apiVersion: v1
-          kind: PersistentVolumeClaim
-          metadata:
-            name: app-pvc
-          spec:
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 1Gi
+    - name: Cargar todos los manifiestos desde el archivo combinado
+      set_fact:
+        k8s_resources: "{{ lookup('file', 'wordpress-mysql.yml') | from_yaml_all }}"
 
-          ---
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: my-app
-          spec:
-            replicas: 2
-            selector:
-              matchLabels:
-                app: my-app
-            template:
-              metadata:
-                labels:
-                  app: my-app
-              spec:
-                containers:
-                  - name: my-app
-                    image: nginx
-                    ports:
-                      - containerPort: 80
-                    volumeMounts:
-                      - mountPath: "/usr/share/nginx/html"
-                        name: storage
-                volumes:
-                  - name: storage
-                    persistentVolumeClaim:
-                      claimName: app-pvc
-
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: my-app-service
-          spec:
-            selector:
-              app: my-app
-            ports:
-              - protocol: TCP
-                port: 80
-                targetPort: 80
-            type: LoadBalancer
-
-    - name: Aplicar la configuración en AKS
-      command: kubectl apply -f /tmp/app_deployment.yml
+    - name: Aplicar manifiestos en AKS
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ item }}"
+      loop: "{{ k8s_resources }}"

@@ -1,36 +1,31 @@
 ---
-- name: Instalar y configurar servidor web Nginx en Podman
+- name: Instalar y configurar servidor web Nginx desde ACR en Podman
   hosts: webserver
   become: true
+  collections:
+    - containers.podman
+    - community.general
+  vars_files:
+    - secrets.yml
   tasks:
-    - name: Instalar paquetes necesarios
+    - name: Autenticarse en ACR desde Podman
+      podman_login:
+        registry: cp2acrckd0cf.azurecr.io
+        username: "{{ acr_username }}"
+        password: "{{ acr_password }}"
+
+    - name: Instalar Podman
       apt:
-        name: 
-          - podman
-          - firewalld
+        name: podman
         state: present
         update_cache: yes
 
-    - name: Habilitar y arrancar firewalld
-      systemd:
-        name: firewalld
-        state: started
-        enabled: yes
-
-    - name: Permitir tráfico HTTP en firewalld
-      firewalld:
-        service: http
-        permanent: yes
-        state: enabled
-
-    - name: Recargar firewalld
-      command: firewall-cmd --reload
-
-    - name: Ejecutar contenedor Nginx en Podman
-      containers.podman.podman_container:
+    - name: Ejecutar contenedor Nginx desde ACR en Podman
+      podman_container:
         name: nginx-server
-        image: docker.io/library/nginx
+        image: cp2acrckd0cf.azurecr.io/nginx:latest
         state: started
         recreate: yes
+        restart_policy: always
         ports:
           - "80:80"
