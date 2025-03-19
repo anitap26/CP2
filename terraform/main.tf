@@ -17,6 +17,9 @@ provider "azurerm" {
 resource "azurerm_resource_group" "cp2" {
   name     = var.resource_group_name
   location = var.location
+tags = {
+    Environment = "casopractico2"
+}
 }
 
 # Generar un sufijo aleatorio para evitar conflictos con nombres repetidos
@@ -33,6 +36,9 @@ resource "azurerm_container_registry" "acrCP2_UNIR" {
   location            = azurerm_resource_group.cp2.location
   sku                 = "Basic"
   admin_enabled       = true
+tags = {
+    Environment = "casopractico2"
+}
 }
 # Creación del Clúster de Kubernetes (AKS)
 resource "azurerm_kubernetes_cluster" "aks_cp2" {
@@ -52,5 +58,8 @@ resource "azurerm_kubernetes_cluster" "aks_cp2" {
   }
 
   role_based_access_control_enabled = true
+tags = {
+    Environment = "casopractico2"
+  }
 
 }

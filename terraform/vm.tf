@@ -28,7 +28,7 @@ source_image_reference {
   }
 
   tags = {
-    environment = "dev"
+    environment = "casopractico2"
   }
 }
 
@@ -41,7 +41,7 @@ resource "azurerm_network_interface" "vm_nic" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.vm_subnet.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
     public_ip_address_id          = azurerm_public_ip.vm_public_ip.id
   }
 }
@@ -51,7 +51,7 @@ resource "azurerm_public_ip" "vm_public_ip" {
   name                = "vm-cp2-public-ip"
   location            = azurerm_resource_group.cp2.location
   resource_group_name = azurerm_resource_group.cp2.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 # Asociación de la interfaz de red con el grupo de seguridad (NSG)

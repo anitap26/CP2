@@ -46,19 +46,6 @@ variable "vm_subnet_prefix" {
   default     = ["10.0.1.0/24"]
 }
 
-# Subnet para AKS
-variable "aks_subnet_name" {
-  description = "Nombre de la Subnet para AKS"
-  type        = string
-  default     = "aks-subnet"
-}
-
-variable "aks_subnet_prefix" {
-  description = "Prefijo de la Subnet de AKS"
-  type        = list(string)
-  default     = ["10.0.2.0/24"]
-}
-
 # Nombre AKS
 variable "aks_name" {
   type    = string

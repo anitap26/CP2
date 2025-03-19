@@ -47,10 +47,6 @@ output "aks_name" {
   value = azurerm_kubernetes_cluster.aks_cp2.name
 }
 
-output "aks_fqdn" {
-  value = azurerm_kubernetes_cluster.aks_cp2.fqdn
-}
-
 output "aks_kubeconfig" {
   value     = azurerm_kubernetes_cluster.aks_cp2.kube_config_raw
   sensitive = true
